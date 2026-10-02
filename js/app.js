@@ -364,7 +364,7 @@ function viewLog(){
    ANIMAL CARDS
    =================================================================== */
 function viewCards(){
-  const page=h("section",{class:"cards-view sect"},h("h1",{class:"gold-text"},"Animal Card Collection"),h("p",{class:"lead"},"Collect new wildlife cards every week. Tap a card to collect it, tap again to flip it, and tilt it to see the shine."));
+  const page=h("section",{class:"cards-view sect"},h("h1",{class:"gold-text"},"Animal Card Collection"),h("p",{class:"lead"},"Collect new wildlife cards every week. Tap a card to collect it, tap it again to read all about it, and tilt it to see the shine."));
   const grid=h("div",{class:"cards-row big"},RR.ANIMALS.map(a=>RR.animalCard(a)));
   const locked=h("div",{class:"cards-locked"},h("p",{},"✨ More cards unlock each week as the race moves along the Royal Road — 18 in all!"));
   const have=RR.cardsCollected().length;

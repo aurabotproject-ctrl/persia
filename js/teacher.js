@@ -267,6 +267,10 @@ function settings(m){
     "Open <code>js/config.js</code> in any text editor, paste it into <code>firebaseUrl</code>, save, and put the whole folder on a web host (see below). Come back here and press <b>Test connection</b>.",
     "<b>Hosting:</b> the folder is a plain website. Free options: GitHub Pages, Netlify Drop (drag the folder onto app.netlify.com/drop), or your school server. Phones need an <b>https</b> address."].map(x=>h("li",{html:x})))));
   const pin1=h("input",{type:"password",placeholder:"New teacher PIN (min 6 characters)",autocomplete:"new-password","aria-label":"New PIN"});
+  { const sel=h("select",{class:"input"}); const fill=()=>{ sel.innerHTML=""; const cur=RR.currentVoice&&RR.currentVoice(); RR.voices().forEach(v=>{ const o=h("option",{value:v.voiceURI},v.name+" ("+v.lang+")"); if(cur&&cur.voiceURI===v.voiceURI) o.selected=true; sel.append(o); }); if(!sel.options.length) sel.append(h("option",{},"No English voices found on this device")); };
+    fill(); if("speechSynthesis" in window) speechSynthesis.addEventListener("voiceschanged",fill);
+    sel.onchange=()=>{ RR.setVoice(sel.value); RR.speak("Welcome to the Royal Road. Listen to how this voice sounds."); };
+    m.append(panel("Read-aloud voice",h("p",{},"Open the app in Google Chrome for the best-sounding voices (look for “Google UK English”). On a Mac you can also add Enhanced or Premium voices in System Settings → Accessibility → Spoken Content → System Voice → Manage Voices. Pick one below to hear it."),sel)); }
   m.append(panel("Reset to a fresh start",h("p",{},"Clears this browser’s progress so the app starts as if it were the very first time: back at Stage 1, intro animation plays again, no cards, stamps or Showdown results, no Darics. Your teacher PIN, text-size and sound settings are kept."),
     Store.mode==="firebase"?h("p",{class:"small"},"⚠ Online play is on, so this also clears the class’s saved Showdown results and Darics online. Class roster and team settings are kept."):h("p",{class:"small"},"Practice mode: this only affects this computer."),
     h("div",{class:"btn-row"},h("button",{class:"btn danger",type:"button",onclick:async()=>{

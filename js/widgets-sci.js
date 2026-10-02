@@ -120,7 +120,7 @@ RR.cardsCollected=()=>RR.ls.get("cards",[]);
 RR.collectCard=id=>{ const c=RR.cardsCollected(); if(!c.includes(id)){ c.push(id); RR.ls.set("cards",c); return true; } return false; };
 RR.animalCard=function(a,{locked=false}={}){
   const have=RR.cardsCollected().includes(a.id);
-  const el=h("button",{class:"acard"+(have?" have":"")+(locked?" locked":""),type:"button","aria-label":(have?a.name:"Locked animal card: tap to collect")},
+  const el=h("button",{class:"acard"+(have?" have":" uncollected")+(locked?" locked":""),type:"button","aria-label":(have?a.name:"Locked animal card: tap to collect")},
     h("div",{class:"ac-inner"},
       h("div",{class:"ac-face ac-front",style:{"--b1":a.bg[0],"--b2":a.bg[1]}},
         h("div",{class:"ac-art"},h("div",{class:"ac-sil",html:RR.art.animalSVG(a.id,190)})),
@@ -133,12 +133,14 @@ RR.animalCard=function(a,{locked=false}={}){
         h("p",{class:"ac-fun"},h("b",{},"Fun fact: "),a.fun),
         h("p",{class:"ac-status"},"Conservation: ",a.status,h("br"),h("small",{},"(check the IUCN Red List for the latest)")))));
   RR.slot(el.querySelector(".ac-art"),a.asset,{fit:"cover"});
+  /* once the real artwork loads, drop the placeholder silhouette so the picture shows cleanly */
+  RR.assetUrl(a.asset).then(u=>{ if(u){ const sil=el.querySelector(".ac-sil"); if(sil) sil.remove(); } });
   /* tilt + holo */
   el.addEventListener("pointermove",e=>{ if(!RR.motionOK()) return; const r=el.getBoundingClientRect(), x=(e.clientX-r.left)/r.width, y=(e.clientY-r.top)/r.height;
     el.style.setProperty("--rx",((.5-y)*16).toFixed(1)+"deg"); el.style.setProperty("--ry",((x-.5)*18).toFixed(1)+"deg"); el.style.setProperty("--mx",(x*100)+"%"); el.style.setProperty("--my",(y*100)+"%"); });
   el.addEventListener("pointerleave",()=>{ el.style.setProperty("--rx","0deg"); el.style.setProperty("--ry","0deg"); });
   el.addEventListener("click",()=>{
-    if(!el.classList.contains("have")){ el.classList.add("have","reveal"); if(RR.collectCard(a.id)){ RR.sfx.fanfare(); RR.coinRain({n:16,z:20}); RR.toast("Card collected: "+a.name+" ✨"); const t=el.querySelector(".ac-title h5"); t.textContent=a.name; const st=el.querySelector(".ac-stats"); st.innerHTML=`<span>🏔 ${RR.esc(a.habitat)}</span><span>🍽 ${RR.esc(a.diet)}</span>`; document.dispatchEvent(new CustomEvent("rr:cards")); } return; }
+    if(!el.classList.contains("have")){ el.classList.add("have","reveal"); el.classList.remove("uncollected"); if(RR.collectCard(a.id)){ RR.sfx.fanfare(); RR.coinRain({n:16,z:20}); RR.toast("Card collected: "+a.name+" ✨"); const t=el.querySelector(".ac-title h5"); t.textContent=a.name; const st=el.querySelector(".ac-stats"); st.innerHTML=`<span>🏔 ${RR.esc(a.habitat)}</span><span>🍽 ${RR.esc(a.diet)}</span>`; document.dispatchEvent(new CustomEvent("rr:cards")); } return; }
     RR.sfx.flip(); RR.openCardDetail(a); });
   return el;
 };
