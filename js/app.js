@@ -153,6 +153,7 @@ function viewStage(n){
     h("button",{class:"scroll-hint","aria-label":"Scroll to the mission",onclick:()=>RR.$(".stage-body",page).scrollIntoView({behavior:"smooth"})},"▾"));
   RR.slot(hero,"W"+String(n).padStart(2,"0")+"-HERO",{fit:"cover",pos:"center bottom"}).then(ok=>{ if(ok&&hero._stop){ hero.classList.add("lite"); hero._stop(); const c=hero.querySelector("canvas.fx"); if(c) c.remove(); if(hero._fx) hero._fx.stop(); } });
   onLeave(()=>hero._destroy&&hero._destroy());
+  RR.embers&&RR.embers(heroWrap,onLeave);
   const glint=hero.querySelector("#shadowGlint");
   if(glint && W){ const open=()=>{ RR.sfx.whoosh(); prog.patch("w"+n,{clue:true}); RR.modal(h("div",{class:"clue"},h("div",{class:"clue-icon",html:A.icon("star",60,"#C5BDD1",3)}),h("p",{class:"big"},W.story.shadowClue),h("p",{class:"small"},"Shirin has pinned this to your Caravan Log. Who is the Shadow Courier? Keep watching…")),{title:"A silver glint…"}); };
     glint.addEventListener("click",open); glint.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();open();} }); }
