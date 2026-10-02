@@ -1,0 +1,84 @@
+/* scene animation classes (animations live on inner <g> so parallax transforms don't collide) */
+.hero{height:clamp(520px,84vh,900px);width:100%}
+.hero svg.layer{position:absolute;left:-6%;top:-4%;width:112%;max-width:none;height:108%;overflow:visible}
+.hero .grain{position:absolute;inset:0;background:var(--paper-grain);opacity:.16;pointer-events:none;z-index:8}
+.hero svg{pointer-events:none}
+.hero svg.glintlayer{pointer-events:none}
+.hero svg .glint{pointer-events:all}
+
+.tw{animation:tw 4.5s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.25}50%{opacity:1}}
+.sunrays{animation:spin 160s linear infinite;transform-box:fill-box}
+@keyframes spin{to{transform:translate(1010px,430px) rotate(360deg)}}
+.sunrays{transform:translate(1010px,430px)}
+.drift{animation:drift 60s ease-in-out infinite alternate}
+.drift.slow{animation-duration:90s}
+.drift.med{animation-duration:55s;animation-direction:alternate-reverse}
+@keyframes drift{from{transform:translateX(-90px)}to{transform:translateX(120px)}}
+.flyx{animation:flyx 70s linear infinite}
+@keyframes flyx{from{transform:translateX(-160px)}to{transform:translateX(1780px)}}
+.bob{animation:bob 7s ease-in-out infinite alternate}
+@keyframes bob{from{transform:translateY(-18px)}to{transform:translateY(24px)}}
+.flap{animation:flap 3.6s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% 40%}
+@keyframes flap{from{transform:scaleY(.62)}to{transform:scaleY(1.05)}}
+.pulse{animation:pulse 3s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes pulse{0%,100%{transform:scale(.8);opacity:.55}50%{transform:scale(1.25);opacity:1}}
+.glint{animation:glintBlink 2.8s ease-in-out infinite}
+@keyframes glintBlink{0%,100%{opacity:.35}45%,55%{opacity:1}}
+.sway{transform-box:fill-box;transform-origin:50% 100%;animation:sway 5s ease-in-out infinite alternate}
+.sway.s1{animation-duration:6.4s;animation-delay:-2s}.sway.s2{animation-duration:4.2s;animation-delay:-1s}
+@keyframes sway{from{transform:skewX(-3deg)}to{transform:skewX(3.5deg)}}
+
+/* camel walk cycle */
+.camel .leg{transform-box:fill-box;transform-origin:50% 0}
+.camel .leg.f1,.camel .leg.b2{animation:legA .95s ease-in-out infinite alternate}
+.camel .leg.b1,.camel .leg.f2{animation:legB .95s ease-in-out infinite alternate}
+@keyframes legA{from{transform:rotate(-16deg)}to{transform:rotate(16deg)}}
+@keyframes legB{from{transform:rotate(16deg)}to{transform:rotate(-16deg)}}
+.camel{animation:camelBob .95s ease-in-out infinite alternate}
+@keyframes camelBob{from{transform:translateY(0)}to{transform:translateY(-3px)}}
+
+/* hub map */
+.hubmap{position:absolute;inset:0;overflow:hidden}
+.hubmap svg{width:100%;height:100%;display:block}
+.hubmap canvas.fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.map-vig{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 160px 40px rgba(54,29,12,.55)}
+#roadDraw{animation:march 14s linear infinite}
+@keyframes march{to{stroke-dashoffset:-400}}
+
+/* parallax photo layers */
+.hero-wrap{position:relative}
+.px-layers{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1;--mx:0;--my:0;--sy:0}
+.px{position:absolute;left:-4%;width:108%;background-repeat:no-repeat;background-position:center bottom;background-size:100% auto;
+  transform:translate(calc(var(--mx)*var(--depth)*-120px),calc(var(--sy)*var(--depth)*.4px + var(--my)*var(--depth)*-40px));transition:transform .25s ease-out}
+.px-clouds{top:4%;height:44%;background-position:center top;opacity:.6;filter:saturate(.7) brightness(.8)}
+.px-far{bottom:34%;height:34%;opacity:.8;filter:saturate(.6) brightness(.75) contrast(1.1)}
+.px-mid{bottom:2%;height:40%;opacity:.9;filter:saturate(.7) brightness(.62)}
+.px-fore{inset:0;left:-4%;height:100%;background-size:cover;background-position:center bottom;filter:brightness(.55) saturate(.8)}
+.px-dust,.px-embers{inset:0;left:0;width:100%;height:100%;background-size:cover;background-position:center;}
+.px-dust{opacity:.45;background-size:cover}.px-embers{opacity:.5}
+@keyframes pxdrift{to{background-position:30% 40%}}@keyframes pxrise{from{background-position:center 0}to{background-position:center -100%}}
+.has-px .hero>svg{opacity:.35}
+.has-px .hero-title,.has-px .scroll-hint{z-index:3}
+body.rm .px-dust,body.rm .px-embers{animation:none}
+.px-far,.px-mid,.px-clouds{-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 22%,#000 78%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 22%,#000 78%,transparent 100%)}
+.px-embers{opacity:.28}.px-dust{opacity:.3}
+.has-px .hero-wrap::after,.has-px.hero-wrap::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(13,12,17,.25),transparent 30%,rgba(13,12,17,.15) 70%,#0D0C11)}
+
+.px{backface-visibility:hidden;contain:strict}
+.px-dust,.px-embers{animation:pxpulse 9s ease-in-out infinite alternate}
+@keyframes pxpulse{from{opacity:.18}to{opacity:.36}}
+
+/* when the photo hero is present, the procedural scene underneath is switched off (it was the source of flicker) */
+.hero.lite svg.layer:not(.glintlayer),.hero.lite .vignette{display:none}
+.hero.lite *{animation:none!important}
+
+.hero .grain{display:none}
+.px-dust,.px-embers{transform:none!important;filter:none!important}
+
+/* plain photo hero */
+.hero.plain{position:relative;min-height:clamp(420px,62vh,640px);background:linear-gradient(180deg,#1b1623,#0d0c11)}
+.hero.plain .asset-img{transform:none!important}
+.glint-btn{position:absolute;right:13%;top:27%;width:44px;height:44px;border:0;background:none;cursor:pointer;z-index:4;padding:0}
+.glint-btn i{position:absolute;inset:14px;border-radius:50%;background:radial-gradient(#fff,rgba(220,215,228,0) 70%);box-shadow:0 0 14px 6px rgba(220,225,240,.55);animation:glintBlink 3.2s ease-in-out infinite}
+.hero-caravan,.px-layers{display:none!important}
