@@ -381,5 +381,25 @@ body.rm .rest-camel{animation:none}
 .scr .rest-camel{filter:drop-shadow(0 0 1.5px rgba(255,226,170,.8)) drop-shadow(0 6px 8px rgba(0,0,0,.45))}
 
 /* anti-flicker: keep hero compositing isolated; fixed bars on their own layer */
-.hero-wrap{isolation:isolate;overflow:hidden}
-.hero-title{will-change:transform;transform:translateZ(0)}
+.hero-wrap{overflow:hidden}
+
+
+/* ---------- student login ---------- */
+.login-view{max-width:760px;margin:2rem auto;padding:0 1rem;text-align:center}
+.login-view .lead{margin-inline:auto}
+.login-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.7rem;margin:1.4rem 0}
+.login-name{min-height:64px;border-radius:14px;border:2px solid var(--gold-hi,#e8c36a);background:rgba(0,0,0,.25);color:inherit;font:inherit;font-weight:800;font-size:1.15rem;cursor:pointer;padding:.5rem .8rem;transition:transform .15s,background .2s}
+.login-name:hover,.login-name:focus-visible{background:rgba(232,195,106,.22);transform:translateY(-2px)}
+.login-foot{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;margin-top:1.2rem}
+.pin-dots{display:flex;gap:.9rem;justify-content:center;margin:1.2rem 0 .4rem}
+.pin-dots i{width:22px;height:22px;border-radius:50%;border:2px solid var(--gold-hi,#e8c36a);display:block}
+.pin-dots i.on{background:var(--gold-hi,#e8c36a)}
+.pin-msg{min-height:1.5em;font-weight:700}
+.pin-pad{display:grid;grid-template-columns:repeat(3,76px);gap:.7rem;justify-content:center;margin:.6rem 0}
+.pin-key{height:76px;border-radius:50%;border:2px solid var(--gold-hi,#e8c36a);background:rgba(0,0,0,.28);color:inherit;font:inherit;font-weight:900;font-size:1.7rem;cursor:pointer}
+.pin-key:active{background:rgba(232,195,106,.3)}
+.acct-chip{flex-direction:column;gap:0;line-height:1.1;align-items:flex-start;max-width:150px}
+.acct-chip span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px}
+.acct-chip small{font-size:.65rem;opacity:.8}
+body.logging-in .tb-nav{visibility:hidden}
+.panel textarea[aria-label="New student first names"]{width:100%;max-width:420px}
