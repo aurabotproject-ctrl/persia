@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lesson Slides — The Royal Road Race</title>
+<meta name="theme-color" content="#0D0C11">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%23C8A04A' stroke='%233F2A08' stroke-width='4'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/royal.css">
+<link rel="stylesheet" href="css/slides.css">
+</head>
+<body class="slides-page">
+<div id="sRoot"></div>
+<script src="js/vendor/confetti.js"></script>
+<script src="js/core.js"></script>
+<script src="js/art.js"></script>
+<script src="js/data/stages.js"></script>
+<script src="js/data/week01.js"></script>
+<script src="js/data/week02.js"></script>
+<script src="js/data/week03.js"></script>
+<script src="js/data/week04.js"></script>
+<script src="js/data/week05.js"></script>
+<script src="js/data/week06.js"></script>
+<script src="js/data/week07.js"></script>
+<script src="js/data/week08.js"></script>
+<script src="js/data/week09.js"></script>
+<script src="js/data/week10.js"></script>
+<script src="js/data/finalize.js"></script>
+<script src="js/data/slides-w1.js"></script>
+<script src="js/data/slides-w2.js"></script>
+<script src="js/data/slides-w3.js"></script>
+<script src="js/data/slides-w4.js"></script>
+<script src="js/data/slides-w5.js"></script>
+<script src="js/data/slides-w6.js"></script>
+<script src="js/data/slides-w7.js"></script>
+<script src="js/data/slides-w8.js"></script>
+<script src="js/data/slides-w9.js"></script>
+<script src="js/data/slides-w10.js"></script>
+<script src="js/slides.js"></script>
+<script>
+(function(){
+  const RR=window.RR, q=new URLSearchParams(location.search), week=+(q.get("w")||RR.activeWeek());
+  const m=location.hash.match(/^#\/(mon|tue|wed|thu|fri)/); const day=m?m[1]:(q.get("d")||null);
+  const root=document.getElementById("sRoot");
+  if(day && RR.WEEKS[week] && RR.WEEKS[week].days[day]) RR.presentSlides(root,week,day);
+  else {
+    document.body.classList.add("pick");
+    const W=RR.WEEKS[week];
+    root.append(RR.h("div",{class:"picker"},
+      RR.h("small",{},"TEACHER · LESSON SLIDES"),RR.h("h1",{class:"gold-text"},"Stage "+week+" · "+W.title),
+      RR.h("p",{},"Choose a lesson to present on the TV or interactive whiteboard. Press ? inside a lesson for the keys."),
+      RR.h("div",{class:"pk"},RR.DAYS.map(d=>{ const L=W.days[d.id], n=RR.buildSlides(week,d.id).length;
+        return RR.h("a",{class:"pkc",href:"slides.html?w="+week+"#/"+d.id+"/1",onclick:()=>setTimeout(()=>location.reload(),0)},RR.h("small",{},d.en),RR.h("b",{},L.title),RR.h("em",{},d.subject+" · "+n+" slides")); })),
+      RR.h("div",{class:"btn-row"},RR.weeks().map(n=>RR.h("a",{class:"btn "+(n===week?"":"ghost")+" small",href:"slides.html?w="+n},"Stage "+n))),RR.h("a",{class:"btn ghost",href:"teacher.html"},"← Teacher area")));
+  }
+})();
+</script>
+</body>
+</html>
