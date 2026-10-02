@@ -139,12 +139,31 @@ RR.animalCard=function(a,{locked=false}={}){
   el.addEventListener("pointerleave",()=>{ el.style.setProperty("--rx","0deg"); el.style.setProperty("--ry","0deg"); });
   el.addEventListener("click",()=>{
     if(!el.classList.contains("have")){ el.classList.add("have","reveal"); if(RR.collectCard(a.id)){ RR.sfx.fanfare(); RR.coinRain({n:16,z:20}); RR.toast("Card collected: "+a.name+" ✨"); const t=el.querySelector(".ac-title h5"); t.textContent=a.name; const st=el.querySelector(".ac-stats"); st.innerHTML=`<span>🏔 ${RR.esc(a.habitat)}</span><span>🍽 ${RR.esc(a.diet)}</span>`; document.dispatchEvent(new CustomEvent("rr:cards")); } return; }
-    el.classList.toggle("flipped"); RR.sfx.flip(); });
+    RR.sfx.flip(); RR.openCardDetail(a); });
   return el;
+};
+RR.openCardDetail=function(a){
+  const prev=document.activeElement;
+  const close=()=>{ ov.remove(); document.removeEventListener("keydown",key); try{prev&&prev.focus()}catch(e){} };
+  const key=e=>{ if(e.key==="Escape") close(); };
+  const art=h("div",{class:"cd-art",style:{"--b1":a.bg[0],"--b2":a.bg[1]}},h("div",{class:"ac-sil",html:RR.art.animalSVG(a.id,220)}));
+  RR.assetUrl(a.asset).then(u=>{ if(u&&art.isConnected){ art.textContent=""; art.append(h("img",{src:u,alt:a.name})); } });
+  const box=h("div",{class:"cd-box",role:"dialog","aria-modal":"true","aria-label":a.name},
+    h("button",{class:"cd-x",type:"button","aria-label":"Close",onclick:close},"✕"),
+    art,
+    h("div",{class:"cd-text"},
+      h("h3",{},a.name),h("p",{class:"cd-sci"},a.sci),
+      h("p",{class:"cd-meta"},"🏔 "+a.habitat+"  ·  🍽 "+a.diet),
+      h("h4",{},"Adaptations"),h("ul",{},(a.adapt||[]).map(t=>h("li",{},t))),
+      h("p",{class:"ac-fun"},h("b",{},"Fun fact: "),a.fun),
+      h("p",{class:"ac-status"},h("b",{},"Conservation: "),a.status," ",h("small",{},"(check the IUCN Red List for the latest)")),
+      h("button",{class:"btn",type:"button",onclick:close},"Close")));
+  const ov=h("div",{class:"cd-ov",onclick:e=>{ if(e.target===ov) close(); }},box);
+  document.body.append(ov); document.addEventListener("keydown",key); box.querySelector(".cd-x").focus();
 };
 RR.widgets.animalCards=function(L){
   const wk=(L&&parseInt((String(L.id||"w1").match(/^w(\d+)/)||[])[1],10))||1;
   const row=h("div",{class:"cards-row"},RR.ANIMALS.filter(a=>a.week===wk).map(a=>RR.animalCard(a)));
-  return RR.widgetBox("Your Animal Cards — Week "+wk,"Tap a card to collect it. Tap again to flip it over. Tilt it to see the holo shine!",row);
+  return RR.widgetBox("Your Animal Cards — Week "+wk,"Tap a card to collect it. Tap it again to read all about it. Tilt it to see the holo shine!",row);
 };
 })();
