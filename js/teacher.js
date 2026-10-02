@@ -21,7 +21,7 @@ function gate(msg){
 }
 
 /* ---------- shell with tabs ---------- */
-const TABS=[["overview","Week at a glance","🗺"],["plans","Lesson plans","📋"],["slides","Lesson slides","🎞"],["showdown","Friday Showdown","🏺"],["class","Class & Darics","🪙"],["results","Results","🏆"],["images","Images","🖼"],["resources","Resources","📎"],["settings","Setup & settings","⚙"]];
+const TABS=[["overview","Week at a glance","🗺"],["plans","Lesson plans","📋"],["slides","Lesson slides","🎞"],["showdown","Friday Showdown","🏺"],["class","Class & Darics","🪙"],["accounts","Student accounts","👤"],["results","Results","🏆"],["images","Images","🖼"],["resources","Resources","📎"],["settings","Setup & settings","⚙"]];
 let curTab="overview";
 function shell(){
   RR.$("#tLogout").hidden=false; RR.$("#tLogout").onclick=()=>{ RR.pin.logout(); location.reload(); };
@@ -36,7 +36,7 @@ function show(id){
   if(!TABS.find(t=>t[0]===id)) id="overview"; curTab=id; history.replaceState(null,"","#"+id);
   RR.$$(".t-tab").forEach(b=>b.classList.toggle("on",b.dataset.t===id));
   const m=RR.$("#tMain"); m.innerHTML=""; window.scrollTo(0,0);
-  ({overview,plans,slides,showdown,classTab,results,images,resources,settings})[id==="class"?"classTab":id](m);
+  ({overview,plans,slides,showdown,classTab,accounts,results,images,resources,settings})[id==="class"?"classTab":id](m);
 }
 const panel=(title,...kids)=>h("section",{class:"panel"},title&&h("h2",{},title),...kids);
 const li=a=>h("ul",{},a.map(x=>h("li",{html:x})));
@@ -196,6 +196,53 @@ async function classTab(m){
   drawDar();
 }
 
+
+/* ===================================================================
+   STUDENT ACCOUNTS — create / rename / reset PIN / delete / progress
+   =================================================================== */
+async function accounts(m){
+  const Ac=RR.Accounts;
+  if(!Ac||!Ac.enabled()){
+    m.append(panel("Student accounts",h("p",{},"Student logins need the shared database. Paste your Firebase database address into ",h("code",{},"js/config.js")," (see README), then reload this page."),
+      h("p",{class:"small"},"Just want to try it out on this computer first?"),h("button",{class:"btn ghost",type:"button",onclick:()=>{ RR.ls.set("accountsTest",true); show("accounts"); }},"Turn on practice mode (this browser only)"))); return; }
+  if(!Store.configured) m.append(panel(null,h("p",{class:"small"},"⚠ Practice mode: accounts are stored only in this browser. Turn on the Firebase address in config.js for real class use.")," ",h("button",{class:"btn small ghost",type:"button",onclick:()=>{ RR.ls.set("accountsTest",false); show("accounts"); }},"Turn practice mode off")));
+  const detail=h("div"); const tableWrap=h("div",{class:"tbl-wrap"}); const shown=h("div");
+  const stageOf=id=>+(/^w(\d+)/.exec(id)||[0,0])[1];
+  const stat=(sid,d)=>{ const prog=(d&&d.progress)||{}; const done=Object.entries(prog).filter(([k,v])=>v&&v.stamped&&/^w\d+-(mon|tue|wed|thu)$/.test(k)); const stages=new Set(done.map(([k])=>stageOf(k)));
+    return {lessons:done.length,stages:stages.size,cards:Array.isArray(d&&d.cards)?d.cards.length:Object.keys((d&&d.cards)||{}).length,seen:d&&d.seen}; };
+  const ago=t=>{ if(!t) return "never"; const m=Math.round((Date.now()-t)/60000); if(m<2) return "just now"; if(m<60) return m+" min ago"; const hh=Math.round(m/60); if(hh<24) return hh+" h ago"; return new Date(t).toLocaleDateString("en-NZ"); };
+  const showPins=(rows,title)=>{ shown.innerHTML=""; shown.append(panel(title||"New PINs — write these down now",h("p",{class:"small"},"PINs are stored scrambled, so they can’t be shown again. If one is lost, just reset it."),
+    h("table",{class:"grid"},h("thead",{},h("tr",{},h("th",{},"Name"),h("th",{},"PIN"))),h("tbody",{},rows.map(r=>h("tr",{},h("td",{},r.name),h("td",{},h("b",{},r.pin)))))),
+    h("div",{class:"btn-row"},h("button",{class:"btn",type:"button",onclick:()=>RR.printNode("<h1>Royal Road Race — login cards</h1>"+rows.map(r=>`<div class="box" style="display:inline-block;width:42%;margin:.5rem"><h3>${RR.esc(r.name)}</h3><p>My PIN: <b style="font-size:1.6em;letter-spacing:.2em">${RR.esc(r.pin)}</b></p></div>`).join(""),"Login cards")},"🖨 Print login cards"),
+      h("button",{class:"btn ghost",type:"button",onclick:()=>dl([["Name","PIN"],...rows.map(r=>[r.name,r.pin])],"student-pins.csv")},"⬇ CSV"),h("button",{class:"btn ghost",type:"button",onclick:()=>{ shown.innerHTML=""; }},"Hide")))); shown.scrollIntoView({behavior:"smooth",block:"start"}); };
+  const ta=h("textarea",{rows:6,"aria-label":"New student first names",placeholder:"One first name per line"});
+  const addBtn=h("button",{class:"btn",type:"button",onclick:async()=>{ const names=ta.value.split("\n").map(x=>x.trim()).filter(Boolean); if(!names.length) return; addBtn.disabled=true; const out=[]; try{ for(const n of names){ const r=await Ac.create(n); if(r) out.push(r); } }catch(e){ RR.toast("Couldn’t save — check the connection"); } addBtn.disabled=false; ta.value=""; if(out.length){ showPins(out); draw(); } }},"Create accounts");
+  m.append(panel("Add students",h("p",{},"First names only. Each student gets a random 4-digit PIN. Two students with the same first name? Add a last initial (e.g. “Sam T”)."),ta,h("div",{class:"btn-row"},addBtn)),shown);
+  m.append(panel("Class list",h("p",{class:"small"},"Students tap their name, then enter their PIN. Their settings, Log entries and collected cards follow them to any device."),tableWrap,h("div",{class:"btn-row"},h("button",{class:"btn ghost",type:"button",onclick:draw},"↻ Refresh"))),detail);
+  async function draw(){
+    tableWrap.textContent="Loading…"; let list,data; try{ list=await Ac.list(); data=await Ac.data(); }catch(e){ tableWrap.textContent="Couldn’t reach the database."; return; }
+    if(!list.length){ tableWrap.textContent="No students yet. Add some above."; return; }
+    const tb=h("tbody");
+    list.forEach(a=>{ const st=stat(a.sid,data[a.sid]);
+      tb.append(h("tr",{},h("td",{},h("b",{},a.name)),h("td",{},ago(st.seen)),h("td",{},st.lessons+" / "+(RR.WEEKS?Object.keys(RR.WEEKS).length*4:40)),h("td",{},String(st.stages)),h("td",{},st.cards+" / 18"),
+        h("td",{},h("div",{class:"btn-row"},
+          h("button",{class:"btn small ghost",type:"button",onclick:()=>showDetail(a,data[a.sid])},"Details"),
+          h("button",{class:"btn small ghost",type:"button",onclick:async()=>{ const n=prompt("New name for this student:",a.name); if(n&&n.trim()){ await Ac.rename(a.sid,n); draw(); } }},"Rename"),
+          h("button",{class:"btn small ghost",type:"button",onclick:async()=>{ const c=prompt("Reset PIN for "+a.name+".\nType a new 4-digit PIN, or leave blank for a random one:",""); if(c===null) return; if(c&&!/^\d{4}$/.test(c.trim())){ RR.toast("PIN must be exactly 4 numbers"); return; } const pin=await Ac.setPin(a.sid,c.trim()||null); showPins([{name:a.name,pin}],"New PIN for "+a.name); }},"Reset PIN"),
+          h("button",{class:"btn small ghost",type:"button",onclick:async()=>{ if(confirm("Delete "+a.name+"’s account and ALL their saved progress? This can’t be undone.")){ await Ac.remove(a.sid); detail.innerHTML=""; draw(); } }},"Delete"))))); });
+    tableWrap.innerHTML=""; tableWrap.append(h("table",{class:"grid"},h("thead",{},h("tr",{},["Name","Last active","Lessons stamped","Stages","Cards","Actions"].map(x=>h("th",{},x)))),tb),
+      h("div",{class:"btn-row"},h("button",{class:"btn small ghost",type:"button",onclick:()=>dl([["Name","Last active","Lessons stamped","Stages with progress","Cards"],...list.map(a=>{ const st=stat(a.sid,data[a.sid]); return [a.name,st.seen?new Date(st.seen).toLocaleString("en-NZ"):"",st.lessons,st.stages,st.cards]; })],"student-progress.csv")},"⬇ Progress CSV")));
+  }
+  function showDetail(a,d){
+    d=d||{}; detail.innerHTML=""; const prog=d.progress||{}; const ids=Object.keys(prog).sort();
+    const body=ids.length?ids.map(id=>{ const v=prog[id]||{}; const bits=[]; if(v.stamped) bits.push("✔ stamped"); if(v.finished) bits.push("finished"); if(v.creed) bits.push("Creed: "+v.creed); if(v.respond) bits.push("Response: "+v.respond); if(v.note) bits.push("Note: "+v.note); if(v.clue) bits.push("Clue found");
+      return h("li",{},h("b",{},id.toUpperCase()+" — "),bits.join(" · ")||"started"); }):[h("li",{},"No work saved yet.")];
+    const cards=Array.isArray(d.cards)?d.cards:Object.values(d.cards||{});
+    detail.append(panel(a.name+" — details",h("p",{class:"small"},"Last active: "+ago(d.seen)),h("h3",{},"Lessons"),h("ul",{},body),h("h3",{},"Animal cards ("+cards.length+")"),h("p",{},cards.join(", ")||"None yet."),h("button",{class:"btn ghost small",type:"button",onclick:()=>{ detail.innerHTML=""; }},"Close"))); detail.scrollIntoView({behavior:"smooth",block:"start"});
+  }
+  draw();
+}
+
 /* ===================================================================
    RESULTS
    =================================================================== */
@@ -271,6 +318,9 @@ function settings(m){
     fill(); if("speechSynthesis" in window) speechSynthesis.addEventListener("voiceschanged",fill);
     sel.onchange=()=>{ RR.setVoice(sel.value); RR.speak("Welcome to the Royal Road. Listen to how this voice sounds."); };
     m.append(panel("Read-aloud voice",h("p",{},"Open the app in Google Chrome for the best-sounding voices (look for “Google UK English”). On a Mac you can also add Enhanced or Premium voices in System Settings → Accessibility → Spoken Content → System Voice → Manage Voices. Pick one below to hear it."),sel)); }
+  { const sel=h("select",{class:"input"},Array.from({length:10},(_,i)=>h("option",{value:i+1},i+1===10?"All 10 stages open":"Stages 1–"+(i+1)+" open")));
+    sel.value=String(RR.openWeeks()); sel.onchange=()=>{ RR.setOpenWeeks(sel.value); RR.toast("Students on this device can now open stages 1–"+sel.value); };
+    m.append(panel("Open stages to students",h("p",{},"Choose how far along the Royal Road students can go on this device. Later stages (and their animal cards) stay locked until you open them. Each device keeps its own setting. This does not change what you can open in the Teacher area."),sel)); }
   m.append(panel("Reset to a fresh start",h("p",{},"Clears this browser’s progress so the app starts as if it were the very first time: back at Stage 1, intro animation plays again, no cards, stamps or Showdown results, no Darics. Your teacher PIN, text-size and sound settings are kept."),
     Store.mode==="firebase"?h("p",{class:"small"},"⚠ Online play is on, so this also clears the class’s saved Showdown results and Darics online. Class roster and team settings are kept."):h("p",{class:"small"},"Practice mode: this only affects this computer."),
     h("div",{class:"btn-row"},h("button",{class:"btn danger",type:"button",onclick:async()=>{

@@ -35,7 +35,7 @@ function observeOnce(el,fn){ if(!("IntersectionObserver" in window)){ fn(); retu
 function riseAll(root){ const els=RR.$$(".rise",root); if(!("IntersectionObserver" in window)||!RR.motionOK()){ els.forEach(e=>e.classList.add("in")); return; }
   const io=new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } }),{threshold:.1}); els.forEach(e=>io.observe(e)); }
 const subjectTheme={mon:"#95513B",tue:"#5E718C",wed:"#4F7A5A",thu:"#574A6B",fri:"#8D2A30"};
-const weekAvailable=n=>!!RR.WEEKS[n];
+const weekAvailable=n=>!!RR.WEEKS[n]&&n<=RR.openWeeks();
 
 /* ---------- routing ---------- */
 function parse(){ const parts=location.hash.replace(/^#\/?/,"").split("/").filter(Boolean); return parts; }
@@ -159,7 +159,7 @@ function viewStage(n){
     glint.addEventListener("click",open); glint.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();open();} }); }
 
   const body=h("div",{class:"stage-body"});
-  if(!W){ body.append(h("div",{class:"parchment locked-note rise"},h("h2",{},"The road isn’t open this far yet"),h("p",{},"Stage "+n+" unlocks later in the term. Check the Royal Road map and the Stage "+(n-1)+" story first!"),h("button",{class:"btn",onclick:()=>nav("#/")},"Back to the map"))); page.append(heroWrap,body); app.append(page); return; }
+  if(!W||!weekAvailable(n)){ body.append(h("div",{class:"parchment locked-note rise"},h("h2",{},"The road isn’t open this far yet"),h("p",{},"Stage "+n+" unlocks later in the term. Check the Royal Road map and the Stage "+(n-1)+" story first!"),h("button",{class:"btn",onclick:()=>nav("#/")},"Back to the map"))); page.append(heroWrap,body); app.append(page); return; }
 
   // Shirin briefing
   const bTxt=h("p",{class:"brief-text"},W.story.briefingFull); let easy=false;
@@ -199,7 +199,7 @@ function viewStage(n){
    MISSION page (one lesson)
    =================================================================== */
 function viewMission(n,day){
-  const W=RR.WEEKS[n]; if(!W||!W.days[day]) return viewStage(n);
+  const W=RR.WEEKS[n]; if(!W||!W.days[day]||!weekAvailable(n)) return viewStage(n);
   const L=W.days[day], D=RR.DAYS.find(d=>d.id===day), theme=subjectTheme[day], S=RR.stage(n);
   const P=prog.get(L.id);
   const page=h("article",{class:"mission",style:{"--theme":theme}});
@@ -365,7 +365,7 @@ function viewLog(){
    =================================================================== */
 function viewCards(){
   const page=h("section",{class:"cards-view sect"},h("h1",{class:"gold-text"},"Animal Card Collection"),h("p",{class:"lead"},"Collect new wildlife cards every week. Tap a card to collect it, tap it again to read all about it, and tilt it to see the shine."));
-  const grid=h("div",{class:"cards-row big"},RR.ANIMALS.map(a=>RR.animalCard(a)));
+  const grid=h("div",{class:"cards-row big"},RR.ANIMALS.map(a=>RR.animalCard(a,{collectable:false})));
   const locked=h("div",{class:"cards-locked"},h("p",{},"✨ More cards unlock each week as the race moves along the Royal Road — 18 in all!"));
   const have=RR.cardsCollected().length;
   page.append(h("p",{class:"count"},h("b",{},have+" / "+RR.ANIMALS.length)," collected so far"),grid,locked); app.append(page);
@@ -416,6 +416,7 @@ function wireBar(){
   RR.$("#btnSettings").addEventListener("click",()=>RR.$("#settings").classList.toggle("open"));
   RR.$("#btnSound").addEventListener("click",()=>{ RR.setSetting("sound",!RR.settings.sound); if(RR.settings.sound) RR.sfx.coin(); syncSound(); RR.$$("#settings input[type=checkbox]")[0].checked=RR.settings.sound; });
   syncSound();
+  if(RR.Accounts){ const chip=RR.Accounts.chip(); if(chip) RR.$("#btnSound").before(chip); }
   RR.$("#navHome").innerHTML=A.icon("home",24,"currentColor",3)+"<span>Map</span>";
   RR.$("#navLog").innerHTML=A.icon("book",24,"currentColor",3)+"<span>Log</span>";
   RR.$("#navCards").innerHTML=A.icon("paw",24,"currentColor",3)+"<span>Cards</span>";
@@ -426,7 +427,9 @@ function wireBar(){
 
 /* ---------- boot ---------- */
 async function boot(){
-  RR.applySettings(); wireBar();
+  RR.applySettings();
+  if(RR.Accounts&&RR.Accounts.needLogin()){ document.body.classList.add("logging-in"); await RR.Accounts.showLogin(RR.$("#app")||document.body); return; }
+  wireBar();
   await render();
   if(!RR.ls.get("seenIntro",false) && !parse().length && !new URLSearchParams(location.search).has("nointro")) RR.cinematic.play();
   else if(new URLSearchParams(location.search).has("intro")){ try{ history.replaceState(null,"",location.pathname+location.hash); }catch(e){} RR.cinematic.play(); }
