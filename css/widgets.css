@@ -163,3 +163,6 @@
 .cd-text ul{padding-left:1.2rem;margin:.3rem 0}.cd-text li{margin:.25rem 0}
 .cd-x{position:absolute;top:8px;right:8px;z-index:5;width:38px;height:38px;border-radius:50%;border:2px solid #BA9B58;background:rgba(19,15,24,.85);color:#EAE0C5;font-size:1.1rem}
 @media (max-width:640px){.cd-box{grid-template-columns:1fr;overflow-y:auto}.cd-art{min-height:220px;max-height:34vh}.cd-text{overflow:visible;max-height:none}}
+
+.acard.uncollected .ac-front{filter:grayscale(.85) brightness(.55)}
+.acard.uncollected:hover .ac-front{filter:grayscale(.4) brightness(.8)}

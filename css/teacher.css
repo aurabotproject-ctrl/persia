@@ -109,3 +109,6 @@ table.grid tr:nth-child(even) td{background:rgba(255,255,255,.35)}
 .slph{display:flex;flex-wrap:wrap;gap:.3rem}.slph span{font-size:.72rem;font-weight:800;padding:.1em .6em;border-radius:99px;background:#15141a;color:var(--pc);border:1px solid var(--pc)}
 
 .wk-sel{font:700 .85rem var(--f-body);padding:.35rem .6rem;border-radius:10px;border:1px solid var(--gold);background:#15141a;color:#EFE3C0;max-width:260px}
+
+.btn.danger{background:linear-gradient(#8a2a2a,#5e1818);color:#fff;border-color:#c06060}
+.btn.danger:hover{filter:brightness(1.15)}

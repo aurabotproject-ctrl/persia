@@ -168,8 +168,8 @@ body.rm .gold-text{animation:none}
 
 /* ===== CINEMATIC GRADE (storm, ash, crimson & burnished gold) ===== */
 body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9990;
-  background:radial-gradient(120% 100% at 50% 40%,transparent 55%,rgba(0,0,0,.55) 100%),var(--paper-grain);
-  opacity:.55;transform:translateZ(0)}
+  background:radial-gradient(120% 100% at 50% 40%,transparent 55%,rgba(0,0,0,.55) 100%);
+  opacity:.9}
 body.rm::after{background:radial-gradient(120% 100% at 50% 40%,transparent 60%,rgba(0,0,0,.4) 100%)}
 .scene svg,.hero svg,.hubmap svg,svg.scene{filter:saturate(.62) contrast(1.08) brightness(.94)}
 .scene img,.hero img,.hubmap img{filter:saturate(.9) contrast(1.06)}
