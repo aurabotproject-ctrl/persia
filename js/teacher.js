@@ -5,6 +5,14 @@
 (function(){
 "use strict";
 const RR=window.RR, h=RR.h, SD=RR.SD, Store=RR.Store, A=RR.art;
+
+/* printing: teacher.html doesn't load app.js, so define a pop-up-free print helper here */
+if(!RR.printNode) RR.printNode=function(html,title="Royal Road Race"){
+  const f=document.createElement("iframe"); f.setAttribute("aria-hidden","true"); f.style.cssText="position:fixed;right:0;bottom:0;width:0;height:0;border:0";
+  document.body.append(f); const d=f.contentDocument; d.open();
+  d.write(`<!doctype html><html><head><meta charset="utf-8"><title>${RR.esc(title)}</title><style>body{font-family:Georgia,serif;margin:24px;color:#222;line-height:1.5}h1,h2,h3{font-family:Georgia,serif}.box{border:2px solid #444;border-radius:8px;padding:12px;margin:12px 0;break-inside:avoid}</style></head><body>${html}</body></html>`); d.close();
+  setTimeout(()=>{ try{ f.contentWindow.focus(); f.contentWindow.print(); }catch(e){ RR.toast("Couldn’t open the print dialog."); } setTimeout(()=>f.remove(),60000); },300);
+};
 const root=RR.$("#tRoot"); let WEEK=RR.activeWeek();
 const W=()=>RR.WEEKS[WEEK];
 const DAYS=RR.DAYS||[{id:"mon",en:"Monday",mi:"Rāhina",subject:"History"},{id:"tue",en:"Tuesday",mi:"Rātū",subject:"Geography"},{id:"wed",en:"Wednesday",mi:"Rāapa",subject:"Science"},{id:"thu",en:"Thursday",mi:"Rāpare",subject:"Art"},{id:"fri",en:"Friday",mi:"Rāmere",subject:"Showdown"}];
