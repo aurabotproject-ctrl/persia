@@ -115,7 +115,7 @@ RR.scenes.hero1 = function(){
   raf=requestAnimationFrame(stepCar);
   root._stop=()=>cancelAnimationFrame(raf);
 
-  const fx=RR.particles(root.querySelector("canvas.fx"),"motes",{color:"255,226,150"});
+  const fx=RR.particles(root.querySelector("canvas.fx"),"motes",{color:"255,226,150"}); root._fx=fx;
   const par=(RR.parallaxSVG||(()=>({stop(){}})))(root);
   root._destroy=()=>{ root._stop(); fx.stop(); par.stop&&par.stop(); };
   return root;

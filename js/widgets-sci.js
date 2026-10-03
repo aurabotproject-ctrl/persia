@@ -118,7 +118,7 @@ RR.widgets.vocabMatch=function(){
 /* ---------------- 4. ANIMAL CARDS ---------------- */
 RR.cardsCollected=()=>RR.ls.get("cards",[]);
 RR.collectCard=id=>{ const c=RR.cardsCollected(); if(!c.includes(id)){ c.push(id); RR.ls.set("cards",c); return true; } return false; };
-RR.animalCard=function(a,{locked=false}={}){
+RR.animalCard=function(a,{locked=false,collectable=true}={}){
   const have=RR.cardsCollected().includes(a.id);
   const el=h("button",{class:"acard"+(have?" have":" uncollected")+(locked?" locked":""),type:"button","aria-label":(have?a.name:"Locked animal card: tap to collect")},
     h("div",{class:"ac-inner"},
@@ -126,7 +126,7 @@ RR.animalCard=function(a,{locked=false}={}){
         h("div",{class:"ac-art"},h("div",{class:"ac-sil",html:RR.art.animalSVG(a.id,190)})),
         h("div",{class:"ac-holo"}),
         h("div",{class:"ac-title"},h("h5",{},have?a.name:"???"),h("span",{class:"ac-stars"},"★".repeat(a.rarity)+"☆".repeat(3-a.rarity))),
-        h("div",{class:"ac-stats"},have?[h("span",{},"🏔 "+a.habitat),h("span",{},"🍽 "+a.diet)]:h("span",{},"Tap to collect!"))),
+        h("div",{class:"ac-stats"},have?[h("span",{},"🏔 "+a.habitat),h("span",{},"🍽 "+a.diet)]:h("span",{},collectable?"Tap to collect!":"Find me in Stage "+a.week+" · Wednesday"))),
       h("div",{class:"ac-face ac-back parchment"},
         h("h5",{},a.name),h("small",{},a.sci),
         h("ul",{},a.adapt.map(t=>h("li",{},t))),
@@ -140,6 +140,7 @@ RR.animalCard=function(a,{locked=false}={}){
     el.style.setProperty("--rx",((.5-y)*16).toFixed(1)+"deg"); el.style.setProperty("--ry",((x-.5)*18).toFixed(1)+"deg"); el.style.setProperty("--mx",(x*100)+"%"); el.style.setProperty("--my",(y*100)+"%"); });
   el.addEventListener("pointerleave",()=>{ el.style.setProperty("--rx","0deg"); el.style.setProperty("--ry","0deg"); });
   el.addEventListener("click",()=>{
+    if(!el.classList.contains("have")&&!collectable){ RR.sfx.wrong&&RR.sfx.wrong(); RR.toast("Find this card on the Wednesday science lesson in Stage "+a.week+" 🔍"); return; }
     if(!el.classList.contains("have")){ el.classList.add("have","reveal"); el.classList.remove("uncollected"); if(RR.collectCard(a.id)){ RR.sfx.fanfare(); RR.coinRain({n:16,z:20}); RR.toast("Card collected: "+a.name+" ✨"); const t=el.querySelector(".ac-title h5"); t.textContent=a.name; const st=el.querySelector(".ac-stats"); st.innerHTML=`<span>🏔 ${RR.esc(a.habitat)}</span><span>🍽 ${RR.esc(a.diet)}</span>`; document.dispatchEvent(new CustomEvent("rr:cards")); } return; }
     RR.sfx.flip(); RR.openCardDetail(a); });
   return el;

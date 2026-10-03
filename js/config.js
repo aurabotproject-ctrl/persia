@@ -17,7 +17,7 @@
      • "Offline Teacher-Led mode" runs the Showdown from the teacher's screen with no devices.
    =================================================================== */
 window.RR_CONFIG = {
-  firebaseUrl: "https://persia-race-default-rtdb.asia-southeast1.firebasedatabase.app",               // ← paste your Realtime Database URL here
+   firebaseUrl: "https://persia-race-default-rtdb.asia-southeast1.firebasedatabase.app",                // ← paste your Realtime Database URL here
   classId: "class1",               // change if you run several classes from one database
   appUrl: "",                      // optional: public address of this folder (used in the QR code).
                                    // Leave empty to auto-detect from the page you open the host screen on.

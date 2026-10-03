@@ -548,3 +548,7 @@ RR.embers=function(wrap,onLeave){
 
 /* per-week Showdown backdrop */
 RR.setBackdrop=function(w){ try{ document.documentElement.style.setProperty("--sdbg","url("+new URL("assets/SHOWDOWN-BG-"+(+w||1)+".webp",location.href).href+")"); }catch(e){} };
+
+/* teacher-controlled: how many stages (weeks) are open to students on this device */
+RR.openWeeks=()=>{ const n=+RR.ls.get("openWeeks",10); return n>=1&&n<=10?n:10; };
+RR.setOpenWeeks=n=>RR.ls.set("openWeeks",+n);
